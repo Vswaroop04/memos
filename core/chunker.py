@@ -1,9 +1,17 @@
+from typing import TypedDict
+
+
+class Chunk(TypedDict):
+    text: str
+    index: int
+    type: str
+
 
 def chunk(
     text: str,
     max_chars: int = 512,
     overlap: int = 50
-) -> list[dict]:
+) -> list[Chunk]:
 
     blocks = text.split("\n\n")
 
