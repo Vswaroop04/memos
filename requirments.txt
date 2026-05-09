@@ -5,7 +5,7 @@
   psycopg2-binary
   celery[redis]
   chromadb
-  pymupdf
+  pymupdf4llm
   trafilatura
   openai
   python-dotenv
