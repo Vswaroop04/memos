@@ -1,4 +1,5 @@
 import os
+import time
 from typing import cast
 import chromadb
 from chromadb.api.types import Embeddings
@@ -33,6 +34,7 @@ def store(document_id: str, chunks: list[Chunk], embeddings: list[list[float]], 
                 "source": source,
                 "chunk_index": chunk["index"],
                 "chunk_type": chunk["type"],
+                "ingested_at": int(time.time()),  # Unix epoch — needed for date filters
             }
             for chunk in chunks
         ],
