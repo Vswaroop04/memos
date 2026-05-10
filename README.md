@@ -2,15 +2,15 @@
 
 The Idea is to build a RAG that Ingests PersonalNotes/PersonalKB into a Vector DB allowing you to query and retrieve information from your own personal knowledge.
 
-I want to build this without using any AI tool just like old times research and build
+I built this without using any AI tool just like old times pure research and building.
 
 ##  History
 
-A few days ago I built the simplest possible RAG system just to make sure I fully experiment the core concepts. It was probably around 50 lines of Python. Since then I’ve been experimenting with different parts of the stack and testing different approaches to see what works best.
+A few days ago I built the simplest possible RAG system just to make sure I fully experiment the core concepts. It was probably around 50 lines of Python. Since then I have been experimenting with different parts of the stack and testing different approaches to see what works best.
 
-Now I’m trying to take it beyond the prototype stage and think more about how to make it production-friendly.
+Now I am trying to take it beyond the prototype stage and think more about how to make it production-friendly.
 
-Stack -
+### Stack and why I choose what -
 
 1. Fast API - The idea is to build this fast so Fast api felt like a good option
 2. Vector DB 
@@ -36,3 +36,48 @@ I am going with text-embedding-3-small as it will give me 95% of the quality at 
 
 Right now the pipeline I’m thinking about is:
 extract text → detect and preserve tables in Markdown format → split into chunks with overlap → retain metadata for retrieval.
+
+## Setup
+
+Copy .env.example to .env and fill in the values. You need an OpenAI key, a running Postgres instance, Redis, and Chroma. The docker-compose.yml spins up Postgres, Redis, and Chroma so you do not have to set those up manually.
+
+```
+cp .env.example .env
+docker compose up -d
+pip install -r requirments.txt
+alembic upgrade head
+uvicorn api.main:app --reload
+```
+
+That is it. Two endpoints are all you need to use this.
+
+POST /ingest/text or /ingest/pdf or /ingest/url to push something into the knowledge base, and POST /query to ask a question against everything you have ingested. The ingest side queues the work through Celery so it returns immediately and processes in the background.
+
+```bash
+# ingest a quick note
+curl -X POST http://localhost:8000/ingest/text \
+  -H "Content-Type: application/json" \
+  -d ‘{"text": "The mitochondria is the powerhouse of the cell", "title": "bio-notes"}’
+
+# ingest a PDF
+curl -X POST http://localhost:8000/ingest/pdf \
+  -F "file=@/path/to/notes.pdf"
+
+# ingest a URL
+curl -X POST http://localhost:8000/ingest/url \
+  -H "Content-Type: application/json" \
+  -d ‘{"url": "https://example.com/article"}’
+
+# query
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d ‘{"question": "what do I know about mitochondria", "top_k": 5}’
+```
+
+If you only want results from the last week you can pass days as well.
+
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d ‘{"question": "what do I know about mitochondria", "top_k": 5, "days": 7}’
+```
