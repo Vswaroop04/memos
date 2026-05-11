@@ -81,3 +81,5 @@ curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -d ‘{"question": "what do I know about mitochondria", "top_k": 5, "days": 7}’
 ```
+
+If you have tested this and found something that can be improved, contributions are appreciated.
